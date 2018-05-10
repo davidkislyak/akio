@@ -1,0 +1,13 @@
+╔════════════\
+|  TODO LIST |
+ \___________/ <- had to leave class, GOTTA FIX THIS SNAZZY BOX LATER
+
+just an informal text doc to share thoughts and such
+
+- setup.py script that creates db.json and populates it with the required values to connect to Discord
+
+
+
+
+
+- hire manic to do everything on this list for me (in progress)
