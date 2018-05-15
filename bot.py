@@ -1,10 +1,16 @@
-import asyncio, discord, json, random, os, sys, hashlib
+import asyncio, discord, json, random, re, os, sys, hashlib
 from discord.utils import get as disget
 from datetime import datetime as dt
+from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup
 
 # global objects for the bot:discord.Client, db:dict, and fstr:str
 bot = discord.Client()
-with open("db.json") as f: db, fstr = json.load(f), f.read().strip("\n")
+with open("db.json") as f: db, fstr = json.load(f), f.read()
+
+# a smol code that retrieves html content from urls
+def gethtml(url:str):
+    return BeautifulSoup(urlopen(Request(url, headers={'User-Agent': 'Mozilla/5.0'})), "html.parser")
 
 # user data management functions
 def isval(uid:str, key:str):
@@ -118,13 +124,14 @@ async def on_message(msg):
     if cmd == "status" and args:
         setval(uid, "status", argstr)
 
-    elif cmd == "inew" and args:
-        if isval("imageboard", args[0]):
-            await reply("Tag already exists.", fade=5)
-            return
-        else:
-            setval("imageboard", args[0], {})
-            await reply("Tag created.", fade=5)
+    elif cmd in ("dbr", "danbooru"):
+        page, tags = "1", ""
+        for arg in args:
+            if arg.isdigit(): page = int(arg)
+            else: tags += arg + "+"
+        try:
+            await reply(gethtml("https://danbooru.donmai.us"+random.choice(gethtml(f"https://danbooru.donmai.us/posts?page={page}&tags={tags}").findAll("a",{'href':re.compile("/posts/\\d{7}$")})).get("href")).find("img",{"id":"image"}).get("src"))
+        except Exception as e: print(e)
 
     elif cmd in ("uwo", "owu"):
         this = await bot.send_message(msg.channel, "uwo")
